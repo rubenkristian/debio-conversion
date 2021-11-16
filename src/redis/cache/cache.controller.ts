@@ -6,16 +6,14 @@ export class CacheController {
   constructor(private readonly cacheService: CacheService) {}
 
   @Get()
-  async getCache(
-    @Query("apiKey") apiKey: string
-  ) {
+  async getCache() {
     let cacheExchange = await this.cacheService.getCacheExchange();
 
     if (cacheExchange) {
-      return 
+      return cacheExchange;
     }
 
-    cacheExchange = await this.cacheService.setCacheExchange(apiKey);
+    cacheExchange = await this.cacheService.setCacheExchange();
 
     return cacheExchange;
   }

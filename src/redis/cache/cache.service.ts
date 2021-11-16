@@ -4,6 +4,9 @@ import { Cache } from 'cache-manager';
 import { map } from 'rxjs';
 import { Exchange, SatokinExchange } from '../models/exchange';
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+require('dotenv').config();
+
 @Injectable()
 export class CacheService {
   constructor(
@@ -33,16 +36,18 @@ export class CacheService {
         if (indexApiKey >= listApiKey.length) {
           indexApiKey = 0;
         }
-        await this.cacheManager.set("index_api_key", indexApiKey);
+
+        await this.cacheManager.set("index_api_key", indexApiKey, { ttl: 0 });
         apiKey = listApiKey[indexCurrentApiKey];
       } else {
         const firstIndex = 0;
-        await this.cacheManager.set("index_api_key", firstIndex);
+
+        await this.cacheManager.set("index_api_key", firstIndex, { ttl: 0 });
         apiKey = listApiKey[firstIndex];
       }
     }
 
-    const daiToUsd = await this.exchangeDaiToUsd(apiKey, 0);
+    const daiToUsd: number = await this.exchangeDaiToUsd(apiKey, satokin.dbioToDai);
 
     exchange.dbioToUsd = daiToUsd;
 
@@ -58,15 +63,15 @@ export class CacheService {
       let result: number = null;
 
       const coinMarketCap = this.http.get(
-        "https://pro-api.coinmarketcap.com", 
+        `${process.env.COINMARKETCAP_HOST}/v1/tools/price-conversion`, 
         { 
           headers: {
-            "X-CMC_PRO_API_KEY" : apiKey,
+            'X-CMC_PRO_API_KEY' : apiKey,
           },
           params: {
-            "amount": daiAmount,
-            "symbol": "DAI",
-            "convert": "USD",
+            amount: daiAmount,
+            symbol: "DAI",
+            convert: "USD",
           }
         }
       )
@@ -79,8 +84,9 @@ export class CacheService {
       coinMarketCap.subscribe({
         next(data) {
           // TODO: get exchange from DAI To USD
-          console.log(data);
-          resolve(data.quote["USD"]["price"]);
+          result = data.data.quote["USD"]["price"];
+
+          resolve(result);
         },
 
         error(err) {
@@ -93,8 +99,8 @@ export class CacheService {
   getSatokinExchange(): Promise<SatokinExchange> {
     return new Promise((resolve, reject) => {
       const satokinExchange: SatokinExchange = new SatokinExchange(null, null, null);
-  
-      const satokinReq = this.http.get("https://www.sodaki.com/api/pools").pipe(
+      
+      const satokinReq = this.http.get(`${process.env.SODAKI_HOST}/api/pools`).pipe(
         map(response => {
           return response.data
         }) 
