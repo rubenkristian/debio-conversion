@@ -18,37 +18,27 @@ export class CacheService {
   }
 
   async setCacheExchange() {
-    let apiKey = "";
-
     const satokin = await this.getSatokinExchange();
-    
-    const exchange = new Exchange(satokin, null);
 
-    if (process.env.NODE_ENV === "development") {
-      apiKey = process.env.API_KEY_DEVELOPMENT;
-    } else {
-      const listApiKey = process.env.API_KEY_COINMARKETCAP.split(",");
-      
-      const indexCurrentApiKey: number = await this.cacheManager.get("index_api_key");
+    const listApiKey: string[]        = process.env.API_KEY_COINMARKETCAP.split(",");
+    const indexCurrentApiKey: number  = await this.cacheManager.get<number>("index_api_key");
 
-      if (indexCurrentApiKey) {
-        let indexApiKey = indexCurrentApiKey + 1;
-        if (indexApiKey >= listApiKey.length) {
-          indexApiKey = 0;
-        }
+    let indexApiKey = 0;
 
-        await this.cacheManager.set("index_api_key", indexApiKey, { ttl: 0 });
-        apiKey = listApiKey[indexCurrentApiKey];
-      } else {
-        const firstIndex = 0;
+    if (indexCurrentApiKey !== null) {
+      indexApiKey = indexCurrentApiKey + 1;
 
-        await this.cacheManager.set("index_api_key", firstIndex, { ttl: 0 });
-        apiKey = listApiKey[firstIndex];
+      if (indexApiKey >= listApiKey.length) {
+        indexApiKey = 0;
       }
     }
+    
+    await this.cacheManager.set<number>("index_api_key", indexApiKey, { ttl: 0 });
 
-    const daiToUsd: number = await this.exchangeDaiToUsd(apiKey, satokin.dbioToDai);
+    const apiKey: string    = listApiKey[indexApiKey];
+    const daiToUsd: number  = await this.exchangeDaiToUsd(apiKey, satokin.dbioToDai);
 
+    const exchange: Exchange = new Exchange(satokin, null);
     exchange.dbioToUsd = daiToUsd;
 
     this.cacheManager.set<Exchange>("exchange", exchange);
@@ -56,9 +46,7 @@ export class CacheService {
     return exchange;
   }
 
-  // TODO: testing
   exchangeDaiToUsd(apiKey: string, daiAmount: number): Promise<number> {
-    // TODO: get exchange from DAI to USD
     return new Promise((resolve, reject) => {
       let result: number = null;
 
@@ -77,15 +65,14 @@ export class CacheService {
       )
       .pipe(
         map(response => {
+          result = response.data.data.quote["USD"]["price"];
+
           return response.data
         })
       );
 
       coinMarketCap.subscribe({
-        next(data) {
-          // TODO: get exchange from DAI To USD
-          result = data.data.quote["USD"]["price"];
-
+        next() {
           resolve(result);
         },
 
@@ -100,18 +87,17 @@ export class CacheService {
     return new Promise((resolve, reject) => {
       const satokinExchange: SatokinExchange = new SatokinExchange(null, null, null);
       
-      const satokinReq = this.http.get(`${process.env.SODAKI_HOST}/api/pools`).pipe(
+      const satokinReq = this.http.get(
+        `${process.env.SODAKI_HOST}/api/pools`
+      )
+      .pipe(
         map(response => {
-          return response.data
-        }) 
-      );
-  
-      satokinReq.subscribe({
-        next(list) {
-          for (let i = 0; i < list.length; i++) {
-            if (satokinExchange.dbioToWNear !== null && satokinExchange.wNearToDai !== null) break;
+          for (let i = 0; i < response.data.length; i++) {
+            if (satokinExchange.dbioToWNear !== null && satokinExchange.wNearToDai !== null) {
+              break;
+            }
             
-            const item = list[i];
+            const item = response.data[i];
   
             // check if dbioToWNear is null
             // current data fiatInfo symbol is wNEAR
@@ -140,6 +126,12 @@ export class CacheService {
           // result DBIO to WNear * result WNear to DAI = DBIO to DAI
           satokinExchange.dbioToDai = satokinExchange.dbioToWNear * satokinExchange.wNearToDai;
 
+          return response.data
+        }) 
+      );
+  
+      satokinReq.subscribe({
+        next() {
           resolve(satokinExchange);
         },
 
