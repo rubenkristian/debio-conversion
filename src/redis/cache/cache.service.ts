@@ -41,57 +41,19 @@ export class CacheService {
     const exchange: Exchange = new Exchange(satokin, null);
     exchange.dbioToUsd = daiToUsd;
 
-    this.cacheManager.set<Exchange>("exchange", exchange);
+    await this.cacheManager.set<Exchange>("exchange", exchange);
 
     return exchange;
   }
 
-  exchangeDaiToUsd(apiKey: string, daiAmount: number): Promise<number> {
-    return new Promise((resolve, reject) => {
-      let result: number = null;
-
-      const coinMarketCap = this.http.get(
-        `${process.env.COINMARKETCAP_HOST}/v1/tools/price-conversion`, 
-        { 
-          headers: {
-            'X-CMC_PRO_API_KEY' : apiKey,
-          },
-          params: {
-            amount: daiAmount,
-            symbol: "DAI",
-            convert: "USD",
-          }
-        }
-      )
-      .pipe(
-        map(response => {
-          result = response.data.data.quote["USD"]["price"];
-
-          return response.data
-        })
-      );
-
-      coinMarketCap.subscribe({
-        next() {
-          resolve(result);
-        },
-
-        error(err) {
-          reject(err);
-        }
-      })
-    }); 
-  }
-
   getSatokinExchange(): Promise<SatokinExchange> {
     return new Promise((resolve, reject) => {
-      const satokinExchange: SatokinExchange = new SatokinExchange(null, null, null);
-      
       const satokinReq = this.http.get(
         `${process.env.SODAKI_HOST}/api/pools`
       )
       .pipe(
         map(response => {
+          const satokinExchange: SatokinExchange = new SatokinExchange(null, null, null);
           for (let i = 0; i < response.data.length; i++) {
             if (satokinExchange.dbioToWNear !== null && satokinExchange.wNearToDai !== null) {
               break;
@@ -122,17 +84,17 @@ export class CacheService {
 
           // get dbio to Dai
           // 1 DBIO = x WNear
-          // 1 WNear = y DAI
+          // 1 WNear = x DAI
           // result DBIO to WNear * result WNear to DAI = DBIO to DAI
           satokinExchange.dbioToDai = satokinExchange.dbioToWNear * satokinExchange.wNearToDai;
 
-          return response.data
+          return satokinExchange
         }) 
       );
   
       satokinReq.subscribe({
-        next() {
-          resolve(satokinExchange);
+        next(data) {
+          resolve(data);
         },
 
         error(err) {
@@ -140,5 +102,38 @@ export class CacheService {
         }
       });
     });
+  }
+
+  exchangeDaiToUsd(apiKey: string, daiAmount: number): Promise<number> {
+    return new Promise((resolve, reject) => {
+      const coinMarketCap = this.http.get(
+        `${process.env.COINMARKETCAP_HOST}/v1/tools/price-conversion`, 
+        { 
+          headers: {
+            'X-CMC_PRO_API_KEY' : apiKey,
+          },
+          params: {
+            amount: daiAmount,
+            symbol: "DAI",
+            convert: "USD",
+          }
+        }
+      )
+      .pipe(
+        map(response => {
+          return response.data.data.quote["USD"]["price"];
+        })
+      );
+
+      coinMarketCap.subscribe({
+        next(data) {
+          resolve(data);
+        },
+
+        error(err) {
+          reject(err);
+        }
+      })
+    }); 
   }
 }
