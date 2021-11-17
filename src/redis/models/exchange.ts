@@ -1,8 +1,8 @@
 export class Exchange {
-  constructor(_satokinExchange?: SatokinExchange, _dbioToUsd?: number) {
-    this.dbioToWNear  = _satokinExchange.dbioToWNear;
-    this.wNearToDai   = _satokinExchange.wNearToDai;
-    this.dbioToDai    = _satokinExchange.dbioToDai;
+  constructor(_sodakiExchange?: SodakiExchange, _dbioToUsd?: number) {
+    this.dbioToWNear  = _sodakiExchange.dbioToWNear;
+    this.wNearToDai   = _sodakiExchange.wNearToDai;
+    this.dbioToDai    = _sodakiExchange.dbioToDai;
     this.dbioToUsd    = _dbioToUsd;
   }
   dbioToWNear?: number;
@@ -11,7 +11,7 @@ export class Exchange {
   dbioToUsd?: number;
 }
 
-export class SatokinExchange {
+export class SodakiExchange {
   constructor(_dbioToWNear?: number, _wNearToDai?: number, _dbioToDai?: number) {
     this.dbioToWNear  = _dbioToWNear;
     this.wNearToDai   = _wNearToDai;

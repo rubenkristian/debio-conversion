@@ -2,7 +2,7 @@ import { HttpService } from '@nestjs/axios';
 import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { map } from 'rxjs';
-import { Exchange, SatokinExchange } from '../models/exchange';
+import { Exchange, SodakiExchange } from '../models/exchange';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require('dotenv').config();
@@ -18,7 +18,7 @@ export class CacheService {
   }
 
   async setCacheExchange() {
-    const satokin = await this.getSatokinExchange();
+    const sodaki = await this.getSodakiExchange();
 
     const listApiKey: string[]        = process.env.API_KEY_COINMARKETCAP.split(",");
     const indexCurrentApiKey: number  = await this.cacheManager.get<number>("index_api_key");
@@ -36,9 +36,9 @@ export class CacheService {
     await this.cacheManager.set<number>("index_api_key", indexApiKey, { ttl: 0 });
 
     const apiKey: string    = listApiKey[indexApiKey];
-    const daiToUsd: number  = await this.exchangeDaiToUsd(apiKey, satokin.dbioToDai);
+    const daiToUsd: number  = await this.exchangeDaiToUsd(apiKey, sodaki.dbioToDai);
 
-    const exchange: Exchange = new Exchange(satokin, null);
+    const exchange: Exchange = new Exchange(sodaki, null);
     exchange.dbioToUsd = daiToUsd;
 
     await this.cacheManager.set<Exchange>("exchange", exchange);
@@ -46,16 +46,16 @@ export class CacheService {
     return exchange;
   }
 
-  getSatokinExchange(): Promise<SatokinExchange> {
+  getSodakiExchange(): Promise<SodakiExchange> {
     return new Promise((resolve, reject) => {
-      const satokinReq = this.http.get(
+      const sodakiReq = this.http.get(
         `${process.env.SODAKI_HOST}/api/pools`
       )
       .pipe(
         map(response => {
-          const satokinExchange: SatokinExchange = new SatokinExchange(null, null, null);
+          const sodakiExchange: SodakiExchange = new SodakiExchange(null, null, null);
           for (let i = 0; i < response.data.length; i++) {
-            if (satokinExchange.dbioToWNear !== null && satokinExchange.wNearToDai !== null) {
+            if (sodakiExchange.dbioToWNear !== null && sodakiExchange.wNearToDai !== null) {
               break;
             }
             
@@ -64,21 +64,21 @@ export class CacheService {
             // check if dbioToWNear is null
             // current data fiatInfo symbol is wNEAR
             // current data assetInfo symbol is DBIO
-            if (satokinExchange.dbioToWNear === null 
+            if (sodakiExchange.dbioToWNear === null 
               && (item.fiatInfo.symbol === "wNEAR" 
               && item.assetInfo.symbol === "DBIO")) {
               // pass value from current data price to dbioToWNear
-              satokinExchange.dbioToWNear = parseFloat(item.price);
+              sodakiExchange.dbioToWNear = parseFloat(item.price);
             }
   
             // check if wNearToDai is null
             // current data fiatInfo symbol is DAI
             // current data assetInfo symbol is wNEAR
-            if (satokinExchange.wNearToDai === null 
+            if (sodakiExchange.wNearToDai === null 
               && item.fiatInfo.symbol === "DAI" 
               && item.assetInfo.symbol === "wNEAR") {
               // pass value from current data price to wNearToDai
-              satokinExchange.wNearToDai = parseFloat(item.price);
+              sodakiExchange.wNearToDai = parseFloat(item.price);
             }
           }
 
@@ -86,13 +86,13 @@ export class CacheService {
           // 1 DBIO = x WNear
           // 1 WNear = x DAI
           // result DBIO to WNear * result WNear to DAI = DBIO to DAI
-          satokinExchange.dbioToDai = satokinExchange.dbioToWNear * satokinExchange.wNearToDai;
+          sodakiExchange.dbioToDai = sodakiExchange.dbioToWNear * sodakiExchange.wNearToDai;
 
-          return satokinExchange
+          return sodakiExchange
         }) 
       );
   
-      satokinReq.subscribe({
+      sodakiReq.subscribe({
         next(data) {
           resolve(data);
         },
