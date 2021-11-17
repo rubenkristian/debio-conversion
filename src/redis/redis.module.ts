@@ -4,6 +4,9 @@ import * as redisStore from 'cache-manager-redis-store';
 import { CacheController } from './cache/cache.controller';
 import { CacheService } from './cache/cache.service';
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+require('dotenv').config();
+
 @Module({
   imports: [
     CacheModule.register({

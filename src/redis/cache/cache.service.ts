@@ -4,6 +4,9 @@ import { Cache } from 'cache-manager';
 import { map } from 'rxjs';
 import { Exchange, SatokinExchange } from '../models/exchange';
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+require('dotenv').config();
+
 @Injectable()
 export class CacheService {
   constructor(
@@ -15,97 +18,48 @@ export class CacheService {
   }
 
   async setCacheExchange() {
-    let apiKey = "";
-
     const satokin = await this.getSatokinExchange();
-    
-    const exchange = new Exchange(satokin, null);
 
-    if (process.env.NODE_ENV === "development") {
-      apiKey = process.env.API_KEY_DEVELOPMENT;
-    } else {
-      const listApiKey = process.env.API_KEY_COINMARKETCAP.split(",");
-      
-      const indexCurrentApiKey: number = await this.cacheManager.get("index_api_key");
+    const listApiKey: string[]        = process.env.API_KEY_COINMARKETCAP.split(",");
+    const indexCurrentApiKey: number  = await this.cacheManager.get<number>("index_api_key");
 
-      if (indexCurrentApiKey) {
-        let indexApiKey = indexCurrentApiKey + 1;
-        if (indexApiKey >= listApiKey.length) {
-          indexApiKey = 0;
-        }
-        await this.cacheManager.set("index_api_key", indexApiKey);
-        apiKey = listApiKey[indexCurrentApiKey];
-      } else {
-        const firstIndex = 0;
-        await this.cacheManager.set("index_api_key", firstIndex);
-        apiKey = listApiKey[firstIndex];
+    let indexApiKey = 0;
+
+    if (indexCurrentApiKey !== null) {
+      indexApiKey = indexCurrentApiKey + 1;
+
+      if (indexApiKey >= listApiKey.length) {
+        indexApiKey = 0;
       }
     }
+    
+    await this.cacheManager.set<number>("index_api_key", indexApiKey, { ttl: 0 });
 
-    const daiToUsd = await this.exchangeDaiToUsd(apiKey, 0);
+    const apiKey: string    = listApiKey[indexApiKey];
+    const daiToUsd: number  = await this.exchangeDaiToUsd(apiKey, satokin.dbioToDai);
 
+    const exchange: Exchange = new Exchange(satokin, null);
     exchange.dbioToUsd = daiToUsd;
 
-    this.cacheManager.set<Exchange>("exchange", exchange);
+    await this.cacheManager.set<Exchange>("exchange", exchange);
 
     return exchange;
   }
 
-  // TODO: testing
-  exchangeDaiToUsd(apiKey: string, daiAmount: number): Promise<number> {
-    // TODO: get exchange from DAI to USD
+  getSatokinExchange(): Promise<SatokinExchange> {
     return new Promise((resolve, reject) => {
-      let result: number = null;
-
-      const coinMarketCap = this.http.get(
-        "https://pro-api.coinmarketcap.com", 
-        { 
-          headers: {
-            "X-CMC_PRO_API_KEY" : apiKey,
-          },
-          params: {
-            "amount": daiAmount,
-            "symbol": "DAI",
-            "convert": "USD",
-          }
-        }
+      const satokinReq = this.http.get(
+        `${process.env.SODAKI_HOST}/api/pools`
       )
       .pipe(
         map(response => {
-          return response.data
-        })
-      );
-
-      coinMarketCap.subscribe({
-        next(data) {
-          // TODO: get exchange from DAI To USD
-          console.log(data);
-          resolve(data.quote["USD"]["price"]);
-        },
-
-        error(err) {
-          reject(err);
-        }
-      })
-    }); 
-  }
-
-  getSatokinExchange(): Promise<SatokinExchange> {
-    return new Promise((resolve, reject) => {
-      const satokinExchange: SatokinExchange = new SatokinExchange(null, null, null);
-  
-      const satokinReq = this.http.get("https://www.sodaki.com/api/pools").pipe(
-        map(response => {
-          return response.data
-        }) 
-      );
-  
-      satokinReq.subscribe({
-        next(list) {
-          for (let i = 0; i < list.length; i++) {
-            if (satokinExchange.dbioToWNear !== null && satokinExchange.wNearToDai !== null) break;
+          const satokinExchange: SatokinExchange = new SatokinExchange(null, null, null);
+          for (let i = 0; i < response.data.length; i++) {
+            if (satokinExchange.dbioToWNear !== null && satokinExchange.wNearToDai !== null) {
+              break;
+            }
             
-            const item = list[i];
+            const item = response.data[i];
   
             // check if dbioToWNear is null
             // current data fiatInfo symbol is wNEAR
@@ -130,11 +84,17 @@ export class CacheService {
 
           // get dbio to Dai
           // 1 DBIO = x WNear
-          // 1 WNear = y DAI
+          // 1 WNear = x DAI
           // result DBIO to WNear * result WNear to DAI = DBIO to DAI
           satokinExchange.dbioToDai = satokinExchange.dbioToWNear * satokinExchange.wNearToDai;
 
-          resolve(satokinExchange);
+          return satokinExchange
+        }) 
+      );
+  
+      satokinReq.subscribe({
+        next(data) {
+          resolve(data);
         },
 
         error(err) {
@@ -142,5 +102,38 @@ export class CacheService {
         }
       });
     });
+  }
+
+  exchangeDaiToUsd(apiKey: string, daiAmount: number): Promise<number> {
+    return new Promise((resolve, reject) => {
+      const coinMarketCap = this.http.get(
+        `${process.env.COINMARKETCAP_HOST}/v1/tools/price-conversion`, 
+        { 
+          headers: {
+            'X-CMC_PRO_API_KEY' : apiKey,
+          },
+          params: {
+            amount: daiAmount,
+            symbol: "DAI",
+            convert: "USD",
+          }
+        }
+      )
+      .pipe(
+        map(response => {
+          return response.data.data.quote["USD"]["price"];
+        })
+      );
+
+      coinMarketCap.subscribe({
+        next(data) {
+          resolve(data);
+        },
+
+        error(err) {
+          reject(err);
+        }
+      })
+    }); 
   }
 }
