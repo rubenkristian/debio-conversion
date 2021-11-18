@@ -1,11 +1,12 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
+import { MessagePattern, Ctx, RedisContext } from '@nestjs/microservices';
 import { CacheService } from './cache.service';
 
-@Controller('cache')
+@Controller()
 export class CacheController {
   constructor(private readonly cacheService: CacheService) {}
 
-  @Get()
+  @MessagePattern({ cmd: 'cache-exchange' })
   async getCache() {
     let cacheExchange = await this.cacheService.getCacheExchange();
 
