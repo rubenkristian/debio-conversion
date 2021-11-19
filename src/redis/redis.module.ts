@@ -9,11 +9,13 @@ require('dotenv').config();
 
 @Module({
   imports: [
-    CacheModule.register({
-      store: redisStore,
-      host: process.env.REDIS_HOST,
-      port: process.env.REDIS_PORT,
-      ttl: (2 * 60 * 60)
+    CacheModule.registerAsync({
+      useFactory: async () => ({
+        store: redisStore,
+        host: process.env.REDIS_HOST,
+        port: process.env.REDIS_PORT,
+        ttl: process.env.CACHE_TTL
+      })
     }),
     HttpModule
   ],
