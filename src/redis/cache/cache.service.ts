@@ -54,31 +54,34 @@ export class CacheService {
       .pipe(
         map(response => {
           const sodakiExchange: SodakiExchange = new SodakiExchange(null, null, null);
-          for (let i = 0; i < response.data.length; i++) {
+
+          const exchangeList = response.data;
+
+          for (let index = 0; index < exchangeList.length; index++) {
             if (sodakiExchange.dbioToWNear !== null && sodakiExchange.wNearToDai !== null) {
               break;
             }
             
-            const item = response.data[i];
+            const exchange = exchangeList[index];
   
             // check if dbioToWNear is null
             // current data fiatInfo symbol is wNEAR
             // current data assetInfo symbol is DBIO
             if (sodakiExchange.dbioToWNear === null 
-              && (item.fiatInfo.symbol === "wNEAR" 
-              && item.assetInfo.symbol === "DBIO")) {
+              && (exchange.fiatInfo.symbol === "wNEAR" 
+              && exchange.assetInfo.symbol === "DBIO")) {
               // pass value from current data price to dbioToWNear
-              sodakiExchange.dbioToWNear = parseFloat(item.price);
+              sodakiExchange.dbioToWNear = parseFloat(exchange.price);
             }
   
             // check if wNearToDai is null
             // current data fiatInfo symbol is DAI
             // current data assetInfo symbol is wNEAR
             if (sodakiExchange.wNearToDai === null 
-              && item.fiatInfo.symbol === "DAI" 
-              && item.assetInfo.symbol === "wNEAR") {
+              && exchange.fiatInfo.symbol === "DAI" 
+              && exchange.assetInfo.symbol === "wNEAR") {
               // pass value from current data price to wNearToDai
-              sodakiExchange.wNearToDai = parseFloat(item.price);
+              sodakiExchange.wNearToDai = parseFloat(exchange.price);
             }
           }
 

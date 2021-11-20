@@ -15,7 +15,7 @@ export class SodakiExchange {
   constructor(_dbioToWNear?: number, _wNearToDai?: number, _dbioToDai?: number) {
     this.dbioToWNear  = _dbioToWNear;
     this.wNearToDai   = _wNearToDai;
-    this.dbioToDai  = _dbioToDai;
+    this.dbioToDai    = _dbioToDai;
   }
   dbioToWNear?: number;
   wNearToDai?: number;
