@@ -13,11 +13,11 @@ export class CacheService {
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache, 
     private readonly http: HttpService) {}
   
-  async getCacheExchange() {
+  async getCacheExchange(): Promise<Exchange> {
     return this.cacheManager.get<Exchange>("exchange");
   }
 
-  async setCacheExchange() {
+  async setCacheExchange(): Promise<Exchange> {
     const sodaki = await this.getSodakiExchange();
 
     const listApiKey: string[]        = process.env.API_KEY_COINMARKETCAP.split(",");

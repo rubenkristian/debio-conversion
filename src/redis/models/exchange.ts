@@ -21,3 +21,12 @@ export class SodakiExchange {
   wNearToDai?: number;
   dbioToDai?: number;
 }
+
+export class DbioToUsdExchange {
+  constructor(_dbio: number, _usd: number) {
+    this.dbio = _dbio;
+    this.usd  = _usd;
+  }
+  dbio: number;
+  usd: number;
+}

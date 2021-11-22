@@ -1,5 +1,6 @@
 import { Controller } from '@nestjs/common';
-import { MessagePattern, Ctx, RedisContext } from '@nestjs/microservices';
+import { MessagePattern } from '@nestjs/microservices';
+import { Exchange, DbioToUsdExchange } from '../models/exchange';
 import { CacheService } from './cache.service';
 
 @Controller()
@@ -17,5 +18,20 @@ export class CacheController {
     cacheExchange = await this.cacheService.setCacheExchange();
 
     return cacheExchange;
+  }
+
+  @MessagePattern({ cmd: 'cache-exchange-dai-to-usd' })
+  async getExchangeDaiToUsd(data: number) {
+    let cacheExchange: Exchange = await this.cacheService.getCacheExchange();
+
+    if (cacheExchange) {
+      const exchange = new DbioToUsdExchange(data, cacheExchange.dbioToUsd * data);
+      return exchange;
+    }
+
+    cacheExchange = await this.cacheService.setCacheExchange();
+    const exchange = new DbioToUsdExchange(data, cacheExchange.dbioToUsd * data);
+
+    return exchange;
   }
 }
