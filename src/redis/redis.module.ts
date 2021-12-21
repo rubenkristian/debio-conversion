@@ -13,6 +13,7 @@ require('dotenv').config();
       store: redisStore,
       host: process.env.REDIS_HOST,
       port: process.env.REDIS_PORT,
+      auth_pass: process.env.REDIS_PASSWORD,
       ttl: (2 * 60 * 60)
     }),
     HttpModule
