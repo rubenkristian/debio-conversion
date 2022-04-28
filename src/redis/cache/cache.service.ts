@@ -49,7 +49,7 @@ export class CacheService {
   getSodakiExchange(): Promise<SodakiExchange> {
     return new Promise((resolve, reject) => {
       const sodakiReq = this.http.get(
-        `${process.env.SODAKI_HOST}/api/pools`
+        `${process.env.SODAKI_HOST}`
       )
       .pipe(
         map(response => {
