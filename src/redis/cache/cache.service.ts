@@ -36,10 +36,10 @@ export class CacheService {
     await this.cacheManager.set<number>("index_api_key", indexApiKey, { ttl: 0 });
 
     const apiKey: string    = listApiKey[indexApiKey];
-    const daiToUsd: number  = await this.convertDaiToUsd(apiKey, sodaki.dbioToDai);
+    const daiToUsd: number = await this.convertDaiToUsd(apiKey, 1);
+    const dbioToUsd: number  = (sodaki.dbioToDai * daiToUsd);
 
-    const exchange: Exchange = new Exchange(sodaki, null);
-    exchange.dbioToUsd = daiToUsd;
+    const exchange: Exchange = new Exchange(sodaki, daiToUsd, dbioToUsd);
 
     await this.cacheManager.set<Exchange>("exchange", exchange);
 
@@ -107,7 +107,7 @@ export class CacheService {
   convertDaiToUsd(apiKey: string, daiAmount: number): Promise<number> {
     return new Promise((resolve, reject) => {
       const coinMarketCap = this.http.get(
-        `${process.env.COINMARKETCAP_HOST}/v1/tools/price-conversion`, 
+        `${process.env.COINMARKETCAP_HOST}/tools/price-conversion`, 
         { 
           headers: {
             'X-CMC_PRO_API_KEY' : apiKey,
