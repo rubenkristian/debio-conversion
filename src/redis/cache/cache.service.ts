@@ -121,7 +121,7 @@ export class CacheService {
       )
       .pipe(
         map(response => {
-          return response.data.data.quote["USD"]["price"];
+          return response.data.data[0].quote["USD"]["price"];
         })
       );
 
