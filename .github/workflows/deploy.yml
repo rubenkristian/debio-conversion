@@ -4,7 +4,7 @@ on:
   release:
     types: [published]
   workflow_run:
-    workflows: ['Builder']
+    workflows: ["Builder"]
     branches: [main]
     types:
       - completed
@@ -42,8 +42,8 @@ jobs:
     env:
       DEPLOY: ${{ secrets.TESTNET_DEPLOY }}
     permissions:
-      contents: 'read'
-      id-token: 'write'
+      contents: "read"
+      id-token: "write"
     steps:
       - name: Checkout code
         if: "${{ env.DEPLOY == 'true' }}"
@@ -52,8 +52,8 @@ jobs:
           fetch-depth: 0
       - name: Authenticate to Google Cloud
         if: "${{ env.DEPLOY == 'true' }}"
-        id: 'auth'
-        uses: 'google-github-actions/auth@v0'
+        id: "auth"
+        uses: "google-github-actions/auth@v0"
         with:
           workload_identity_provider: ${{ secrets.TESTNET_GOOGLE_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.TESTNET_SERVICE_ACCOUNT_EMAIL }}
@@ -123,8 +123,8 @@ jobs:
     env:
       DEPLOY: ${{ secrets.MAINNET_DEPLOY }}
     permissions:
-      contents: 'read'
-      id-token: 'write'
+      contents: "read"
+      id-token: "write"
     steps:
       - name: Checkout code
         if: "${{ env.DEPLOY == 'true' }}"
@@ -133,8 +133,8 @@ jobs:
           fetch-depth: 0
       - name: Authenticate to Google Cloud
         if: "${{ env.DEPLOY == 'true' }}"
-        id: 'auth'
-        uses: 'google-github-actions/auth@v0'
+        id: "auth"
+        uses: "google-github-actions/auth@v0"
         with:
           workload_identity_provider: ${{ secrets.MAINNET_GOOGLE_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.MAINNET_SERVICE_ACCOUNT_EMAIL }}
@@ -204,8 +204,8 @@ jobs:
     env:
       DEPLOY: ${{ secrets.MAINNET_DEPLOY }}
     permissions:
-      contents: 'read'
-      id-token: 'write'
+      contents: "read"
+      id-token: "write"
     steps:
       - name: Checkout code
         if: "${{ env.DEPLOY == 'true' }}"
@@ -214,8 +214,8 @@ jobs:
           fetch-depth: 0
       - name: Authenticate to Google Cloud
         if: "${{ env.DEPLOY == 'true' }}"
-        id: 'auth'
-        uses: 'google-github-actions/auth@v0'
+        id: "auth"
+        uses: "google-github-actions/auth@v0"
         with:
           workload_identity_provider: ${{ secrets.MAINNET_GOOGLE_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.MAINNET_SERVICE_ACCOUNT_EMAIL }}
