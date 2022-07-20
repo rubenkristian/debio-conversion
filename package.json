@@ -1,10 +1,14 @@
 {
-  "name": "debio-redis",
-  "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "name": "debio-conversion",
+  "version": "1.0.2",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "AGPL-3.0",
+  "author": "DeBio Dev Team <debio_dev@blocksphere.id>",
+  "homepage": "https://debio.network",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/debionetwork/debio-conversion.git"
+  },
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",
