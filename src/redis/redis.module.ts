@@ -14,11 +14,11 @@ require('dotenv').config();
       host: process.env.REDIS_HOST,
       port: process.env.REDIS_PORT,
       auth_pass: process.env.REDIS_PASSWORD,
-      ttl: (2 * 60 * 60)
+      ttl: 2 * 60 * 60,
     }),
-    HttpModule
+    HttpModule,
   ],
   providers: [CacheService],
-  controllers: [CacheController]
+  controllers: [CacheController],
 })
 export class RedisModule {}

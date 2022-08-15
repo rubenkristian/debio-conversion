@@ -17,4 +17,20 @@ export class CacheController {
 
     return cacheExchange;
   }
+
+  @Get('fromTo')
+  async getCacheFromTo(@Query('from') from: string, @Query('to') to: string) {
+    let cacheExchange = await this.cacheService.getCacheExchangeFromTo(
+      from,
+      to,
+    );
+
+    if (cacheExchange) {
+      return cacheExchange;
+    }
+
+    cacheExchange = await this.cacheService.setCacheExchangeFromTo(from, to);
+
+    return cacheExchange;
+  }
 }
