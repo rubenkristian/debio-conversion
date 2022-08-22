@@ -6,31 +6,31 @@ export class CacheController {
   constructor(private readonly cacheService: CacheService) {}
 
   @Get()
-  async getCache() {
-    let cacheExchange = await this.cacheService.getCacheExchange();
+  async getCache(@Query('from') from: string, @Query('to') to: string) {
 
-    if (cacheExchange) {
+    if(from && to){
+      let cacheExchange = await this.cacheService.getCacheExchangeFromTo(
+        from,
+        to,
+      );
+  
+      if (cacheExchange) {
+        return cacheExchange;
+      }
+  
+      cacheExchange = await this.cacheService.setCacheExchangeFromTo(from, to);
+  
+      return cacheExchange;
+    } else {
+      let cacheExchange = await this.cacheService.getCacheExchange();
+
+      if (cacheExchange) {
+        return cacheExchange;
+      }
+  
+      cacheExchange = await this.cacheService.setCacheExchange();
+  
       return cacheExchange;
     }
-
-    cacheExchange = await this.cacheService.setCacheExchange();
-
-    return cacheExchange;
-  }
-
-  @Get('fromTo')
-  async getCacheFromTo(@Query('from') from: string, @Query('to') to: string) {
-    let cacheExchange = await this.cacheService.getCacheExchangeFromTo(
-      from,
-      to,
-    );
-
-    if (cacheExchange) {
-      return cacheExchange;
-    }
-
-    cacheExchange = await this.cacheService.setCacheExchangeFromTo(from, to);
-
-    return cacheExchange;
   }
 }
