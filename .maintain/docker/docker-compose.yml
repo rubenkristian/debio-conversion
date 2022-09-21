@@ -13,10 +13,10 @@ services:
       - HOST=0.0.0.0
       - PORT=3000
     ports:
-      - 3001:3000
+      - 3002:3000
     networks:
       debio:
-        ipv4_address: 172.27.1.8
+        ipv4_address: 172.27.1.12
         aliases:
           - debio-conversion
 

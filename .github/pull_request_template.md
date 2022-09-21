@@ -1,7 +1,10 @@
-### JIRA Link
-URL to your task/ticket number in JIRA (if applicable)
-If there's no JIRA ticket number, describe why in description below.
+## Describe your changes
 
-### Changelog / Description
-The description of your task or what is changed.
-e.g: Update config, new feature / bugfix, etc.
+## Issue ticket number / link
+- https://blocksphere2020.atlassian.net/browse/DBIO-ISSUE_NUMBER
+
+## Checklist before requesting a review
+
+- [ ] I have performed a self-review of my code
+- [ ] If it is a core feature, I have added thorough tests.
+- [ ] Will this be part of a product update? If yes, please write one phrase about this update.
