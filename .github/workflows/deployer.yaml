@@ -37,7 +37,7 @@ jobs:
           fetch-depth: 0
       - name: Authenticate to Google Cloud
         id: auth
-        uses: google-github-actions/auth@v0
+        uses: google-github-actions/auth@v1
         with:
           workload_identity_provider: ${{ secrets.TESTNET_GOOGLE_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.TESTNET_GOOGLE_WORKLOAD_IDENTITY_SERVICE_ACCOUNT }}
@@ -108,7 +108,7 @@ jobs:
           fetch-depth: 0
       - name: Authenticate to Google Cloud
         id: auth
-        uses: google-github-actions/auth@v0
+        uses: google-github-actions/auth@v1
         with:
           workload_identity_provider: ${{ secrets.MAINNET_GOOGLE_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.MAINNET_GOOGLE_WORKLOAD_IDENTITY_SERVICE_ACCOUNT }}
