@@ -50,7 +50,7 @@ jobs:
           use_internal_ip: true
           use_auth_provider: true
       - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v0
+        uses: google-github-actions/setup-gcloud@v1
       - name: Tunneling SSH Connections
         run: gcloud compute ssh ${{ secrets.TESTNET_BASTION_INSTANCE_NAME }} --project=${{ secrets.TESTNET_GCP_PROJECT_ID }} --zone ${{ secrets.TESTNET_BASTION_INSTANCE_ZONE }} --quiet --tunnel-through-iap --ssh-flag "-4 -L 8888:127.0.0.1:8888 -N -q -f"
       - name: Get Short SHA
@@ -121,7 +121,7 @@ jobs:
           use_internal_ip: true
           use_auth_provider: true
       - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v0
+        uses: google-github-actions/setup-gcloud@v1
       - name: Tunneling SSH Connections
         run: gcloud compute ssh ${{ secrets.MAINNET_BASTION_INSTANCE_NAME }} --project=${{ secrets.MAINNET_GCP_PROJECT_ID }} --zone ${{ secrets.MAINNET_BASTION_INSTANCE_ZONE }} --quiet --tunnel-through-iap --ssh-flag "-4 -L 8888:127.0.0.1:8888 -N -q -f"
       - name: Setup Helm
