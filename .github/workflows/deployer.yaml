@@ -43,7 +43,7 @@ jobs:
           service_account: ${{ secrets.TESTNET_GOOGLE_WORKLOAD_IDENTITY_SERVICE_ACCOUNT }}
       - name: Get GKE Credentials
         id: get-gke-credentials
-        uses: google-github-actions/get-gke-credentials@v0
+        uses: google-github-actions/get-gke-credentials@v1
         with:
           cluster_name: ${{ secrets.TESTNET_GKE_CLUSTER_NAME }}
           location: ${{ secrets.TESTNET_GKE_LOCATION }}
@@ -114,7 +114,7 @@ jobs:
           service_account: ${{ secrets.MAINNET_GOOGLE_WORKLOAD_IDENTITY_SERVICE_ACCOUNT }}
       - name: Get GKE Credentials
         id: get-gke-credentials
-        uses: google-github-actions/get-gke-credentials@v0
+        uses: google-github-actions/get-gke-credentials@v1
         with:
           cluster_name: ${{ secrets.MAINNET_GKE_CLUSTER_NAME }}
           location: ${{ secrets.MAINNET_GKE_LOCATION }}
